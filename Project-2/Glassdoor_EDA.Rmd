@@ -1,0 +1,291 @@
+---
+title: "EDA on Glassdoor.com Job Postings"
+author: "Samuel Gerken"
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+
+# Libraries
+ 
+Libraries used - tidyverse
+
+# Summary
+The project analyzes job postings from glassdoor.com. Specifically it analyzes the skills, salary, location, and industry of each of the job postings. By correlating skills, such as Hadoop and Spark, we can understand complementary skills to improve competitiveness in a resume. Overall, this project aims to uncover patterns in job postings through visualizations like tables, correlation matrices, and bar graphs. This analysis also offers actionable insights for career planning in the data science field.
+
+# Purpose
+The purpose of this project is to analyze job postings from glassdoor.com. Being a data science major at Florida Poly I do want to get a job in the data science field and I felt like this data would be highly relevant to myself. I wanted to find if there was any very popular skills that would appear in most job postings or if some job skills where correlated, which would indicate that some skills are used for the same purpose, ie big data analytics, or that having both would make me a more competitive applicant. Another question I wanted to find was the most common industries that posted jobs for data science positions. If I tailor my resume and experience to some of the top industries I can increase my chances for a job or internship.
+
+# Data
+
+## Description of features
+
+#### Listed in order of appearance
+
+- Job Title (Character Column of the Job Title)
+- Salary Estimation (Character Column of range of possible salaries)
+- Job Description (Character column of the description posted)
+- Rating(Numerical Column of the rating of the job post)
+- Company(Character Column of the job posting's company)
+- Location(Character Column of where the job is located)
+- Headquarter(Character column of the location of the companies headquarters)
+- Size(Character column of the size of the job posting's company)
+- Type of ownership(Character column of how the job posting's company is owned)
+- Industry(Character column of the industry the job posting's companies' industry)
+- Revenue(Character column of the revenue of the company)
+- min_salary(Numeric column of the minimum possible salary listed on the job posting)
+- max_salary(Numeric column of the maximum possible salary listed on the job posting)
+- avg_salary(Numeric column of the average salary listed on the job posting)
+- job_state(Character Column of the appreciation of the state the job posting is located in)
+- same_state(Boolean value of the job is in the same state as the headquarters)
+- company_age(Numeric column of the age of the company in years)
+- python(Boolean value of if this skill is listed as a skill on the job posting)
+- excel(Boolean value of if this skill is listed as a skill on the job posting)
+- hadoop(Boolean value of if this skill is listed as a skill on the job posting)
+- spark(Boolean value of if this skill is listed as a skill on the job posting)
+- aws(Boolean value of if this skill is listed as a skill on the job posting)
+- tableau(Boolean value of if this skill is listed as a skill on the job posting)
+- big_data(Boolean value of if this skill is listed as a skill on the job posting)
+- job_simp(character column of simplified job title)
+- seniority(character value of if the job posting is a senior position or not)
+
+#### Listed by column type
+
+- Booleans(same_state, python, excel, hadoop, spark, aws, tableau, big_data, seniority)
+
+- Character(job title, salary estimation, job description, company, location, headquarter, size, type of ownership, industry, revenue, job_state, job_simp, seniority)
+
+- Numeric(rating(0-5), min_salary(Thousands of USD), max_salary(Thousands of USD), avg_salary(Thousands of USD))
+
+### Null Values
+
+In most character columns like industry, if a item was unlisted it was inputted into the .csv file as -1. For example when counting the industries these values had to be ignored, but cases where -1 was entered were not dropped, only ignored when counting the type of industry of the job posting
+
+### Orientation of the Data
+
+The orientation of the data was unmodified. The data was tidy with each value in its own cell, each variable had its own column, and each observation had its own row. The data was also in wider format.
+
+# Exploratory Data Analysis
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+#Reading in the data
+data <- read.csv("Cleaned_DS_Jobs.csv")
+```
+
+```{r}
+#Summary of the entire dataset
+summary(data)
+```
+The most important summary statistics are the avg_salary, company_age, and python. In the avg_salary column we can see that we have a min of $43,000 median of $114,000 and max of $271,000. Understanding the average values of the average salary column can help us understand what we as future data scientists and data analysts can expect to get paid. The interesting part in company age are the minimums of -1, which indicate some null values which we might have to remove if we are going to analyze the company age. python is another column which interests me since it is one of the boolean values and its median is 1. What this and the mean indicates is that it is more likely than not that python is request for the job.
+
+
+### Histogram of the Average Salary
+
+
+```{r}
+data %>%
+  ggplot(aes(avg_salary)) +
+  geom_histogram(binwidth = 15, fill = "Black") +
+  xlim(0,300) +
+  labs(
+    title = "Distribution of the average salary",
+    x = "Salary(Thousands of $)",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+  
+```
+First we can see the distribution of the average salary of each posting, since I set a scale range some values did get removed, but they where likely outliers. We can see that the data is skewed right slightly and most average salaries are above $100,000. I expect some of the senior positions(Indicated by a Senior or na in the seniority column) to be the outliers or higher average salaries. Our bin width is set as 15, meaning that values within 15 of a number created by the program are counted for one bar in the graph, I set it at 15 so that we could have a smooth distribution without seeing every data point.
+
+
+### Histogram of the Minimum Salary
+
+
+```{r}
+data %>%
+  ggplot(aes(min_salary)) +
+  geom_histogram(binwidth = 15, fill = "Black") +
+  xlim(0,300) +
+  labs(
+    title = "Distribution of the minimum salary",
+    x = "Salary(Thousands of $)",
+    y = "Frequency"
+  )
+  
+```
+Next we have the distribution of the minimum salary. Once again some values did get removed from the range since they where out of range. We can see that even the minimum salary for some of these positions are still around $80,000 a year. Binwidth is still set at 15 for a smooth distribution.
+
+
+### Histogram of the Maximum Salary
+
+
+```{r}
+data %>%
+  ggplot(aes(max_salary)) +
+  geom_histogram(binwidth = 15, fill = "Black") +
+  xlim(0,300) +
+  labs(
+    title = "Distribution of the maximum salary",
+    x = "Salary(Thousands of $)",
+    y = "Frequency"
+  )
+  
+```
+Above we can see the max salaries are largely above $100,000 dollars and is skewed left slightly. We can see in the warning message that many max salaries where not in the graph since they where likely out of the bounds of the limits.
+
+
+```{r}
+skills_columns <- data[, c("python", "excel", "hadoop", "spark", "aws", "tableau", "big_data")]
+```
+
+```{r}
+frequency_skills <- colSums(skills_columns == 1)
+# First this creates a vector of each column and the count of the frequency
+```
+
+```{r}
+frequency_df <- as.data.frame(frequency_skills) %>%
+  rownames_to_column(var = "Column") %>%
+  rename(Frequency = frequency_skills)
+# This data frame creates two columns, one of the skill column names, then the other of the frequency that each of these skills appears in the job posting
+```
+
+
+### Bar Chart of the Frequency of Each Requested Skill
+
+
+```{r}
+frequency_df %>%
+  ggplot(aes(x= Column, y = Frequency)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(
+    title = "Frequently Requested Skills in Data Science Job Postings",
+    x = "Requested skill"
+  )
+```
+Here we can see a bar chart of the count of each requested skill. We can see that python is by far the most requested skill, with excel at second and spark and aws at third and fourth respectively. This chart is blue since I wanted to show through color that we are analyzing a different variable over the salary columns.
+
+
+```{r}
+cor_matrix <- cor(skills_columns)
+cor_matrix
+```
+Below is a correlation matrix for each skill column, but reading through numbers is not easy on the eyes so I will create a better matrix using ggplot.
+
+
+```{r}
+correlation_long <- as.data.frame(as.table(cor_matrix)) %>%
+  rename(python = Var1, excel = Var2, Correlation = Freq)
+# Converts our correlation matrix to longer data and renames columns so it can be plotted
+```
+
+
+### Correlation Matrix of the Skills in Data Science Job Postings
+
+
+```{r}
+ggplot(correlation_long, aes(x = python, y = excel, fill = Correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+  labs(
+    title = "Correlation Matrix of Skills Requested in Data Science Job Postings",
+    x = "Skills",
+    y = "Skills",
+    fill = "Correlation"
+  )
+```
+Above is a correlation matrix which is much easier to get information from. I used red, white, and blue where red is a positive correlation, blue is a negative correlation, and white is no correlation. The red stripe through the center of the matrix is the correlation of each skill with itself. By looking above to the left or below to the right of this red stripe we can see how each skill correlates with each other skill. The most notable skill correlation are spark and hadoop, and big data and hadoop. Spark and hadoop are two skills used in big data analytics and seeing as they are used for the same purpose, it makes sense that companies need people with at least one of these skills.
+
+
+### Job State Table
+
+
+```{r}
+data %>% 
+  select(job_state) %>%
+  count(job_state) %>%
+  arrange(-n)
+```
+So that we know specifics about the number of job postings per state I made this table which lists the number of job postings in each state in descending order.
+
+
+### Frequency of Each State in Data Science Job Postings
+
+
+```{r}
+data %>%
+  ggplot(aes(job_state)) +
+  labs(
+    x = "Job State",
+    y = "Frequency",
+    title = "Frequency of Each State in Data Science Job Postings"
+  ) +
+  geom_bar(fill = "Red") +
+  coord_flip()
+```
+Above is the job posting frequency by state. We can see that California, Virginia, and Massachusetts lead in job availability. One problem with this graph is that some work from home positions are listed as just US, so at the top of the graph we can see a few jobs listed as such. Changing the color from the last graph serves to stop the reader and make them acknowledge the graph. The graph has been rotated so that every state initials can be read.
+
+
+### Industry Table
+
+
+```{r}
+job_industry_table <- data %>%
+  group_by(Industry) %>%
+  summarize(count = n()) %>%
+  arrange(-count)
+
+job_industry_table
+```
+This is a table including the -1 values from the dataset. Now I will filter that value out and graph this table.
+
+
+```{r}
+filtered_industries <- data %>%
+  filter(Industry != -1) %>%        
+  group_by(Industry) %>%           
+  filter(n() >= 20)
+# I filtered this since their was -1 values for the industry, and since so many industry values where listed, I only wanted to show the ones which have 20 or more references
+```
+
+
+### Most Common Industries of Data Science Job Postings
+
+
+```{r}
+filtered_industries %>%
+  ggplot(aes(Industry)) +
+  labs(
+    x = "Job Industry",
+    y = "Frequency",
+    title = "Most Common Industries of Data Science Job Postings"
+  ) +
+  geom_bar(fill = "Dark Green") +
+  coord_flip()
+```
+Above is the Frequency of each job industry in the job postings. Two filters had to be applied, one to remove the -1 values from some industry entries and another so that we only see industries which have over 20 entries, without this the chart get cluttered and even with a rotated axis you cant read what each industry is. The axis is also rotated so that we can see and read each of the top industries. Our top industries are Biotech & Pharmaceuticals, IT Services, and Computer Hardware & Software. Green was chosen as the graph's color to differentiate it from the other graphs.
+
+
+# Results
+
+In this analysis I tried to use boolean values, character values, and numerical values. I tried and succeeded in creating at least one chart for each of these types. I did this since if I just focused on boolean values, I would have limited our scope to just the skills and only so many other insights could of been made. Similarly with numerical values, I would have only limited us to the rating and salary figures. 
+Overall, the findings indicate that the top 3 industries are Biotech & Pharmaceuticals, IT Services, Computer Hardware & Software. The top 3 states where data science jobs are at are California, Virginia, and Massachusetts. The two skills with the highest correlation were Spark and Hadoop at 53.17% and big data and hadoop at 35.87%. One important thing to mention about the correlation results is that just because these skills(or general descriptor with the chase of big data) have a correlation, does not mean that they cause each other or that automatically if you have both of these skills that you can suddenly get a job.
+
+
+# Conclusions
+
+This project provided valuable insights into data science job postings by analyzing skills, salaries, industries, and locations. The analysis revealed that the top industries for data science roles include Biotech & Pharmaceuticals, IT Services, and Computer Hardware & Software, while California, Virginia, and Massachusetts lead in job availability. Hadoop and Spark emerged as strongly correlated skills, suggesting their compatibility in the job market. However, a key limitation was the inability to extract keywords from job descriptions, which might have revealed additional skills not explicitly listed in other columns.
+
+For future work, exploring the relationship between specific skills and their impact on average salaries would provide further actionable insights. This additional analysis could help anyone applying for a data science position if they wanted know how to maximize their salaries. 
+
+
+# References
+
+"R for Data Science" by Garrett Grolemund and Hadley Wickham 
+
+ Data from kaggle.com, [Direct Link](https://www.kaggle.com/datasets/rashikrahmanpritom/data-science-job-posting-on-glassdoor?select=Uncleaned_DS_jobs.csv)
