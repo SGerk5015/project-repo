@@ -16,5 +16,5 @@ Then to run the website constantly, gunicorn was installed and configured with a
 
 Side note - I followed a youtube tutorial and exported the dictionary as a pkl file, this did not work and needed fixing in the ec2
 
-Directed Link
+Directed Link - This is no longer the link to the instance, to save remaining credits it has since been shut down
 http://3.236.100.109/
